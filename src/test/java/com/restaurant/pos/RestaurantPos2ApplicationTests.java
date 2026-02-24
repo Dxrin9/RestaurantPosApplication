@@ -1,4 +1,4 @@
-package com.inn.cafe.restaurantpos2;
+package com.restaurant.pos;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
