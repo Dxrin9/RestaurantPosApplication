@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Shift Management — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link" th:href="@{/tables}" sec:authorize="hasAnyRole('WAITER','ADMIN')">🪑 Tables</a>
+        <a class="nav-link" th:href="@{/station/kitchen}" sec:authorize="hasAnyRole('KITCHEN','ADMIN')">👨‍🍳 Kitchen</a>
+        <a class="nav-link" th:href="@{/station/bar}"     sec:authorize="hasAnyRole('BAR','ADMIN')">🍹 Bar</a>
+        <a class="nav-link" th:href="@{/station/pizza}"   sec:authorize="hasAnyRole('PIZZA','ADMIN')">🍕 Pizza</a>
+        <a class="nav-link" th:href="@{/admin/live-shifts}" sec:authorize="hasRole('ADMIN')">📊 Live</a>
+        <a class="nav-link" th:href="@{/admin/reports/shifts}" sec:authorize="hasRole('ADMIN')">📈 Reports</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container" style="max-width:600px">
+    <div class="page-header" style="margin-top:24px">
+        <h1>⏱ Time Clock</h1>
+        <p>Manage your work shift</p>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-error"   th:if="${error}"   th:text="${error}"></div>
+
+    <div class="card">
+        <!-- Active shift indicator -->
+        <div class="shift-status">
+            <div th:if="${hasActiveShift}">
+                <div class="status-indicator active">✅</div>
+                <p class="shift-time">Shift in Progress</p>
+                <p class="shift-info" th:if="${activeShift != null}">
+                    Started at: <strong th:text="${#temporals.format(activeShift.startTime, 'HH:mm')}"></strong>
+                    on <strong th:text="${#temporals.format(activeShift.shiftDate, 'dd MMM yyyy')}"></strong>
+                </p>
+                <form method="post" th:action="@{/shift/end}">
+                    <button type="submit" class="btn btn-danger btn-lg">🛑 END SHIFT</button>
+                </form>
+            </div>
+
+            <div th:unless="${hasActiveShift}">
+                <div class="status-indicator inactive">⏸️</div>
+                <p class="shift-time">No Active Shift</p>
+                <p class="shift-info">You are not clocked in. Press START to begin your shift.</p>
+                <form method="post" th:action="@{/shift/start}">
+                    <button type="submit" class="btn btn-success btn-lg">▶️ START SHIFT</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick links based on role -->
+    <div class="card">
+        <div class="card-title">Quick Navigation</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap">
+            <a th:href="@{/tables}" class="btn btn-primary" sec:authorize="hasAnyRole('WAITER','ADMIN')">🪑 Go to Tables</a>
+            <a th:href="@{/station/kitchen}" class="btn btn-info" sec:authorize="hasAnyRole('KITCHEN','ADMIN')">👨‍🍳 Kitchen Station</a>
+            <a th:href="@{/station/bar}"     class="btn btn-info" sec:authorize="hasAnyRole('BAR','ADMIN')">🍹 Bar Station</a>
+            <a th:href="@{/station/pizza}"   class="btn btn-info" sec:authorize="hasAnyRole('PIZZA','ADMIN')">🍕 Pizza Station</a>
+            <a th:href="@{/admin/live-shifts}" class="btn btn-warning" sec:authorize="hasRole('ADMIN')">📊 Admin Dashboard</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

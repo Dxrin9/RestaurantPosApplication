@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kitchen Station — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Auto-refresh every 30 seconds for real-time updates -->
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link active" th:href="@{/station/kitchen}">👨‍🍳 Kitchen</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header" style="margin-top:24px; display:flex; justify-content:space-between; align-items:center">
+        <div>
+            <h1>👨‍🍳 Kitchen Station</h1>
+            <p>Pending items to prepare &nbsp;|&nbsp; Auto-refreshes every 30s</p>
+        </div>
+        <span class="badge" style="background:#fef9e7; color:#f39c12; font-size:1rem; padding:8px 16px">
+            <span th:text="${#lists.size(items)}">0</span> Pending
+        </span>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <!-- Empty state -->
+    <div class="card" th:if="${#lists.isEmpty(items)}" style="text-align:center; padding:48px">
+        <div style="font-size:3rem">✅</div>
+        <h3 style="margin-top:16px; color:#27ae60">All caught up!</h3>
+        <p style="color:#666">No pending kitchen items.</p>
+    </div>
+
+    <!-- Kitchen items -->
+    <div th:each="item : ${items}">
+        <div class="station-item">
+            <div class="station-item-info">
+                <h3 th:text="${item.menuItem.name}">Grilled Chicken</h3>
+                <p>
+                    Table <strong th:text="${item.order.table.tableNumber}">1</strong>
+                    &nbsp;|&nbsp;
+                    Order <strong th:text="${item.order.orderNumber}">ORD-001</strong>
+                    &nbsp;|&nbsp;
+                    Qty: <strong th:text="${item.quantity}">1</strong>
+                    &nbsp;|&nbsp;
+                    <span th:text="${item.unitPrice + '€'}">0.00€</span>
+                </p>
+                <p th:if="${item.notes}" style="color:#e94560; margin-top:4px">
+                    📝 Note: <strong th:text="${item.notes}">note</strong>
+                </p>
+            </div>
+            <form method="post" th:action="@{/station/item/{id}/done(id=${item.id})}">
+                <input type="hidden" name="stationPath" value="kitchen">
+                <button type="submit" class="btn btn-success">✅ DONE</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+@startuml Factory Pattern - TicketPrinter
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+title Factory Method Pattern - TicketPrinter System
+
+package "factory" {
+    interface TicketPrinter <<interface>> {
+        + printTicket(OrderItem item) : String
+    }
+
+    class TicketPrinterFactory <<Component>> {
+        + create(StationType stationType) : TicketPrinter
+    }
+
+    class KitchenTicketPrinter {
+        + printTicket(OrderItem item) : String
+    }
+
+    class BarTicketPrinter {
+        + printTicket(OrderItem item) : String
+    }
+
+    class PizzaTicketPrinter {
+        + printTicket(OrderItem item) : String
+    }
+}
+
+package "enums" {
+    enum StationType {
+        KITCHEN
+        BAR
+        PIZZA
+    }
+}
+
+package "entity" {
+    class OrderItem {
+        - id : Long
+        - quantity : Integer
+        - unitPrice : BigDecimal
+        - notes : String
+        - extras : String
+        + getOrder() : Order
+        + getMenuItem() : MenuItem
+        + getQuantity() : Integer
+        + getNotes() : String
+        + getExtras() : String
+    }
+}
+
+' Relationships
+TicketPrinter <|.. KitchenTicketPrinter : implements
+TicketPrinter <|.. BarTicketPrinter : implements
+TicketPrinter <|.. PizzaTicketPrinter : implements
+
+TicketPrinterFactory ..> TicketPrinter : creates
+TicketPrinterFactory ..> KitchenTicketPrinter : creates
+TicketPrinterFactory ..> BarTicketPrinter : creates
+TicketPrinterFactory ..> PizzaTicketPrinter : creates
+TicketPrinterFactory --> StationType : uses
+
+TicketPrinter --> OrderItem : uses
+KitchenTicketPrinter --> OrderItem : uses
+BarTicketPrinter --> OrderItem : uses
+PizzaTicketPrinter --> OrderItem : uses
+
+note right of TicketPrinterFactory
+  **Factory Method Pattern**
+  Creates the correct TicketPrinter
+  based on StationType without
+  exposing creation logic to client
+end note
+
+note bottom of TicketPrinter
+  Common interface for all
+  station ticket printers.
+  Each station formats
+  tickets differently.
+end note
+
+@enduml
+

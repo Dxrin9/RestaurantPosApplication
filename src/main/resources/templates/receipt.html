@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar no-print">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/tables}">🪑 Tables</a>
+        <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print</button>
+    </div>
+</nav>
+
+<div class="container" style="padding-top:24px">
+    <div class="receipt">
+        <!-- Header -->
+        <div class="receipt-header">
+            <div class="receipt-title">🍽️ Restaurant POS</div>
+            <div class="receipt-sub">Thank you for dining with us!</div>
+            <div style="margin-top:8px; font-size:0.85rem; color:#666">
+                <div th:text="'Date: ' + ${#temporals.format(payment.paidAt, 'dd MMM yyyy HH:mm')}"></div>
+                <div th:text="'Order: ' + ${order.orderNumber}"></div>
+                <div th:text="'Table: ' + ${order.table.tableNumber}"></div>
+                <div th:if="${order.waiter}" th:text="'Waiter: ' + ${order.waiter.fullName}"></div>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="receipt-items">
+            <div th:each="item : ${order.items}" th:if="!${item.voided}" class="receipt-item">
+                <span>
+                    <span th:text="${item.menuItem.name}">Item</span>
+                    <span style="color:#999"> x<span th:text="${item.quantity}">1</span></span>
+                </span>
+                <span th:text="${item.lineTotal + '€'}">0.00€</span>
+            </div>
+        </div>
+
+        <!-- Totals -->
+        <div style="border-top:1px dashed #ccc; padding-top:12px">
+            <div class="receipt-item">
+                <span>Subtotal</span>
+                <span th:text="${payment.totalAmount + '€'}">0.00€</span>
+            </div>
+            <div class="receipt-item" th:if="${payment.discountAmount != null and payment.discountAmount > 0}">
+                <span style="color:#e74c3c">Discount</span>
+                <span style="color:#e74c3c" th:text="'-' + ${payment.discountAmount} + '€'">-0.00€</span>
+            </div>
+        </div>
+
+        <div class="receipt-total" style="display:flex; justify-content:space-between; margin-top:12px; font-size:1.2rem">
+            <span>TOTAL PAID</span>
+            <span th:text="${payment.finalAmount + '€'}">€0.00</span>
+        </div>
+
+        <div style="margin-top:12px; font-size:0.9rem; color:#666">
+            Payment: <strong th:text="${payment.method}">CASH</strong>
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer" style="margin-top:24px; border-top:1px dashed #ccc; padding-top:16px">
+            <p>Receipt ID: <span th:text="${payment.id}">1</span></p>
+            <p style="margin-top:8px">Please come back again! 😊</p>
+        </div>
+    </div>
+
+    <!-- Actions (not printed) -->
+    <div class="no-print" style="text-align:center; margin-top:20px; display:flex; gap:12px; justify-content:center">
+        <a th:href="@{/tables}" class="btn btn-primary">🪑 Back to Tables</a>
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Receipt</button>
+    </div>
+</div>
+</body>
+</html>

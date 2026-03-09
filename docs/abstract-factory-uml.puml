@@ -1,0 +1,149 @@
+@startuml AbstractFactoryPattern
+!theme plain
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #000000
+skinparam arrowColor #000000
+
+' ============================================================
+' ABSTRACT FACTORY PATTERN - Restaurant POS System
+' ============================================================
+' Purpose: Create families of related configuration objects
+' without specifying their concrete classes
+'
+' Structure:
+' - Abstract Factory (Interface): RestaurantModeFactory
+' - Concrete Factories: StandardRestaurantFactory, BanquetRestaurantFactory
+' - Abstract Products: OrderFormConfig, ReceiptConfig
+' - Concrete Products: Anonymous inner classes implementing interfaces
+' ============================================================
+
+' ========== ABSTRACT FACTORY INTERFACE ==========
+interface RestaurantModeFactory {
+    {abstract} OrderFormConfig createOrderFormConfig()
+    {abstract} ReceiptConfig createReceiptConfig()
+}
+
+' ========== ABSTRACT PRODUCT INTERFACES ==========
+interface OrderFormConfig {
+    {abstract} boolean isDiscountAllowed()
+    {abstract} int getMaxItemsPerOrder()
+    {abstract} String getFormTitle()
+}
+
+interface ReceiptConfig {
+    {abstract} boolean showLogo()
+    {abstract} String getFooterMessage()
+    {abstract} boolean showItemizedTax()
+}
+
+' ========== CONCRETE FACTORY 1: Standard Mode ==========
+class StandardRestaurantFactory {
+    -stereotype: @Component("standardFactory")
+    --
+    +OrderFormConfig createOrderFormConfig()
+    +ReceiptConfig createReceiptConfig()
+}
+
+' Standard Order Form Concrete Product
+class StandardOrderFormConfig <<anonymous>> {
+    -isDiscountAllowed: boolean = true
+    -maxItemsPerOrder: int = 50
+    -formTitle: String = "Standard Order"
+    --
+    +boolean isDiscountAllowed()
+    +int getMaxItemsPerOrder()
+    +String getFormTitle()
+}
+
+' Standard Receipt Concrete Product
+class StandardReceiptConfig <<anonymous>> {
+    -showLogo: boolean = true
+    -footerMessage: String = "Thank you for dining with us!"
+    -showItemizedTax: boolean = false
+    --
+    +boolean showLogo()
+    +String getFooterMessage()
+    +boolean showItemizedTax()
+}
+
+' ========== CONCRETE FACTORY 2: Banquet Mode ==========
+class BanquetRestaurantFactory {
+    -stereotype: @Component("banquetFactory")
+    --
+    +OrderFormConfig createOrderFormConfig()
+    +ReceiptConfig createReceiptConfig()
+}
+
+' Banquet Order Form Concrete Product
+class BanquetOrderFormConfig <<anonymous>> {
+    -isDiscountAllowed: boolean = false
+    -maxItemsPerOrder: int = 200
+    -formTitle: String = "Banquet Order"
+    --
+    +boolean isDiscountAllowed()
+    +int getMaxItemsPerOrder()
+    +String getFormTitle()
+}
+
+' Banquet Receipt Concrete Product
+class BanquetReceiptConfig <<anonymous>> {
+    -showLogo: boolean = true
+    -footerMessage: String = "Thank you for choosing us for your event!"
+    -showItemizedTax: boolean = true
+    --
+    +boolean showLogo()
+    +String getFooterMessage()
+    +boolean showItemizedTax()
+}
+
+' ========== RELATIONSHIPS ==========
+
+' Factory implements Abstract Factory
+StandardRestaurantFactory ..|> RestaurantModeFactory : implements
+BanquetRestaurantFactory ..|> RestaurantModeFactory : implements
+
+' Factories create products
+StandardRestaurantFactory ..> StandardOrderFormConfig : creates
+StandardRestaurantFactory ..> StandardReceiptConfig : creates
+BanquetRestaurantFactory ..> BanquetOrderFormConfig : creates
+BanquetRestaurantFactory ..> BanquetReceiptConfig : creates
+
+' Products implement Abstract Products
+StandardOrderFormConfig ..|> OrderFormConfig : implements
+StandardReceiptConfig ..|> ReceiptConfig : implements
+BanquetOrderFormConfig ..|> OrderFormConfig : implements
+BanquetReceiptConfig ..|> ReceiptConfig : implements
+
+' ========== NOTES ==========
+note right of RestaurantModeFactory
+    **Abstract Factory Interface**
+    Declares methods for creating
+    families of related objects
+end note
+
+note right of StandardRestaurantFactory
+    **Concrete Factory - Standard Mode**
+    Normal per-table à la carte service
+    - Discounts are allowed
+    - Max 50 items per order
+end note
+
+note right of BanquetRestaurantFactory
+    **Concrete Factory - Banquet Mode**
+    Large-group fixed-menu service
+    - No per-item discounts
+    - Max 200 items per order (events)
+end note
+
+note left of OrderFormConfig
+    **Abstract Product Interface**
+    Configuration for order form UI
+end note
+
+note left of ReceiptConfig
+    **Abstract Product Interface**
+    Configuration for receipt printing
+end note
+
+@enduml
+

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!--/* Reusable navigation bar fragment */-->
+<nav class="navbar" th:fragment="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <!-- Waiter & Admin links -->
+        <a class="nav-link" th:href="@{/shift}" sec:authorize="isAuthenticated()">⏱ Shift</a>
+        <a class="nav-link" th:href="@{/tables}" sec:authorize="hasAnyRole('WAITER','ADMIN')">🪑 Tables</a>
+
+        <!-- Station links -->
+        <a class="nav-link" th:href="@{/station/kitchen}" sec:authorize="hasAnyRole('KITCHEN','ADMIN')">👨‍🍳 Kitchen</a>
+        <a class="nav-link" th:href="@{/station/bar}"     sec:authorize="hasAnyRole('BAR','ADMIN')">🍹 Bar</a>
+        <a class="nav-link" th:href="@{/station/pizza}"   sec:authorize="hasAnyRole('PIZZA','ADMIN')">🍕 Pizza</a>
+
+        <!-- Admin links -->
+        <a class="nav-link" th:href="@{/admin/live-shifts}"    sec:authorize="hasRole('ADMIN')">📊 Live</a>
+        <a class="nav-link" th:href="@{/admin/reports/shifts}" sec:authorize="hasRole('ADMIN')">📈 Reports</a>
+
+        <!-- User info + logout -->
+        <span style="color:#aaa; margin: 0 8px;" sec:authorize="isAuthenticated()">
+            |  <sec:authentication property="name" />
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm" sec:authorize="isAuthenticated()">Logout</button>
+        </form>
+    </div>
+</nav>
+</body>
+</html>

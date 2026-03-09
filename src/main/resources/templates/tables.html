@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tables — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link active" th:href="@{/tables}">🪑 Tables</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header" style="margin-top:24px">
+        <h1>🪑 Tables</h1>
+        <p>Select a table to open or view its order</p>
+    </div>
+
+    <!-- Legend -->
+    <div style="display:flex; gap:16px; margin-bottom:20px; font-size:0.85rem; color:#666">
+        <span>⬜ Available</span>
+        <span style="color:#e94560">🔴 Occupied</span>
+    </div>
+
+    <div class="table-grid">
+        <a th:each="table : ${tables}"
+           th:href="@{/order/{id}(id=${table.id})}"
+           class="table-card"
+           th:classappend="${table.occupied} ? 'occupied' : ''">
+            <div class="table-number" th:text="${table.tableNumber}">1</div>
+            <div class="table-status"
+                 th:class="${table.occupied} ? 'table-status occupied' : 'table-status'"
+                 th:text="${table.occupied} ? '🔴 Occupied' : '⬜ Available'">
+            </div>
+            <div style="font-size:0.75rem; color:#aaa; margin-top:4px" th:text="'Seats ' + ${table.capacity}"></div>
+        </a>
+    </div>
+</div>
+</body>
+</html>
