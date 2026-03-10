@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-logo">🍽️</div>
+        <h1 class="login-title">Restaurant POS</h1>
+        <p class="login-subtitle">Sign in to your account</p>
+
+        <!-- Error alert -->
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+        <!-- Success/logout message -->
+        <div class="alert alert-info" th:if="${message}" th:text="${message}"></div>
+
+        <form method="post" th:action="@{/login}">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control"
+                       placeholder="e.g. chi_ion" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control"
+                       placeholder="Password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:8px">
+                Sign In
+            </button>
+        </form>
+
+        <div style="margin-top:24px; padding-top:16px; border-top:1px solid #eee; font-size:0.8rem; color:#999; text-align:center">
+            Demo accounts: admin / chi_ion / kitchen1 / bar1 / pizza1<br>
+            Password: <strong>pass123</strong> (admin: <strong>admin123</strong>)
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Shifts — Admin — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta http-equiv="refresh" content="60">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link active" th:href="@{/admin/live-shifts}">📊 Live</a>
+        <a class="nav-link" th:href="@{/admin/reports/shifts}">📈 Reports</a>
+        <a class="nav-link" th:href="@{/admin/orders}">📋 Orders</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header" style="margin-top:24px">
+        <h1>📊 Live Dashboard</h1>
+        <p>Currently clocked-in employees &nbsp;|&nbsp; Auto-refreshes every 60s</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid-3" style="margin-bottom:24px">
+        <div class="stat-card">
+            <div class="stat-number" th:text="${#lists.size(activeShifts)}">0</div>
+            <div class="stat-label">Employees On Shift</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color:#27ae60">Live</div>
+            <div class="stat-label">System Status</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="font-size:1.2rem; color:#3498db"
+                 th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">00:00</div>
+            <div class="stat-label">Current Time</div>
+        </div>
+    </div>
+
+    <!-- Active shifts table -->
+    <div class="card">
+        <div class="card-title">👥 Employees Currently Working</div>
+
+        <div th:if="${#lists.isEmpty(activeShifts)}" style="text-align:center; padding:32px; color:#999">
+            No employees currently on shift.
+        </div>
+
+        <table class="data-table" th:unless="${#lists.isEmpty(activeShifts)}">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Clock In Time</th>
+                    <th>Date</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="shift : ${activeShifts}">
+                    <td><strong th:text="${shift.user.fullName}">Name</strong></td>
+                    <td th:text="${shift.user.username}">username</td>
+                    <td>
+                        <span class="badge badge-new" th:text="${shift.user.role}">ROLE</span>
+                    </td>
+                    <td th:text="${#temporals.format(shift.startTime, 'HH:mm:ss')}">00:00:00</td>
+                    <td th:text="${#temporals.format(shift.shiftDate, 'dd MMM yyyy')}">date</td>
+                    <td>
+                        <span style="color:#27ae60">● Active</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

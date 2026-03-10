@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Report — Admin — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link" th:href="@{/admin/live-shifts}">📊 Live</a>
+        <a class="nav-link active" th:href="@{/admin/reports/shifts}">📈 Reports</a>
+        <a class="nav-link" th:href="@{/admin/orders}">📋 Orders</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header" style="margin-top:24px">
+        <h1>📈 Daily Report</h1>
+        <p th:text="'Today: ' + ${#temporals.format(#temporals.createToday(), 'dd MMMM yyyy')}">Today</p>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card">
+            <div class="stat-number" th:text="${report.totalOrders}">0</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color:#27ae60"
+                 th:text="${report.totalSales + '€'}">0.00€</div>
+            <div class="stat-label">Total Sales</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color:#e74c3c"
+                 th:text="${report.totalDiscounts + '€'}">0.00€</div>
+            <div class="stat-label">Discounts Given</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" style="color:#f39c12"
+                 th:text="${report.voidedItems}">0</div>
+            <div class="stat-label">Voided Items</div>
+        </div>
+    </div>
+
+    <!-- Employee hours -->
+    <div class="card">
+        <div class="card-title">⏱ Worked Hours Today</div>
+
+        <div th:if="${report.workedMinutesPerEmployee.isEmpty()}"
+             style="text-align:center; padding:24px; color:#999">
+            No completed shifts today.
+        </div>
+
+        <table class="data-table" th:unless="${report.workedMinutesPerEmployee.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Minutes Worked</th>
+                    <th>Hours Worked</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="entry : ${report.workedMinutesPerEmployee}">
+                    <td><strong th:text="${entry.key}">Name</strong></td>
+                    <td th:text="${entry.value}">0</td>
+                    <td th:text="${#numbers.formatDecimal(entry.value / 60.0, 1, 1)} + 'h'">0.0h</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Shift details -->
+    <div class="card">
+        <div class="card-title">📋 Today's Shifts</div>
+        <div th:if="${#lists.isEmpty(shifts)}" style="text-align:center; padding:24px; color:#999">No shifts today.</div>
+        <table class="data-table" th:unless="${#lists.isEmpty(shifts)}">
+            <thead><tr><th>Employee</th><th>Role</th><th>Start</th><th>End</th><th>Minutes</th></tr></thead>
+            <tbody>
+                <tr th:each="s : ${shifts}">
+                    <td th:text="${s.user.fullName}">Name</td>
+                    <td><span class="badge badge-new" th:text="${s.user.role}">ROLE</span></td>
+                    <td th:text="${#temporals.format(s.startTime, 'HH:mm')}">00:00</td>
+                    <td th:text="${s.endTime != null} ? ${#temporals.format(s.endTime, 'HH:mm')} : 'Active'">—</td>
+                    <td th:text="${s.workedMinutes != null} ? ${s.workedMinutes} : '—'">—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Order list -->
+    <div class="card">
+        <div class="card-title">📋 All Orders Today</div>
+        <div th:if="${#lists.isEmpty(orders)}" style="text-align:center; padding:24px; color:#999">No orders yet.</div>
+        <table class="data-table" th:unless="${#lists.isEmpty(orders)}">
+            <thead><tr><th>Order #</th><th>Table</th><th>Status</th><th>Total</th><th>Time</th><th>Actions</th></tr></thead>
+            <tbody>
+                <tr th:each="o : ${orders}">
+                    <td th:text="${o.orderNumber}">ORD-001</td>
+                    <td th:text="${o.table.tableNumber}">1</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${#strings.toLowerCase(o.status)}"
+                              th:text="${o.status}">NEW</span>
+                    </td>
+                    <td th:text="${o.total + '€'}">0.00€</td>
+                    <td th:text="${o.createdAt != null} ? ${#temporals.format(o.createdAt, 'HH:mm')} : '—'">—</td>
+                    <td>
+                        <form method="post" th:action="@{/admin/orders/{id}/cancel(id=${o.id})}"
+                              th:if="${o.status.name() != 'PAID' and o.status.name() != 'CANCELLED'}"
+                              style="display:inline">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Cancel this order?')">Void</button>
+                        </form>
+                        <a th:if="${o.status.name() == 'PAID'}"
+                           th:href="@{/receipt/order/{id}(id=${o.id})}" class="btn btn-info btn-sm">Receipt</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All Orders — Admin — Restaurant POS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link" th:href="@{/admin/live-shifts}">📊 Live</a>
+        <a class="nav-link" th:href="@{/admin/reports/shifts}">📈 Reports</a>
+        <a class="nav-link active" th:href="@{/admin/orders}">📋 Orders</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header" style="margin-top:24px">
+        <h1>📋 All Orders</h1>
+        <p>View, void items, and cancel orders</p>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-error"   th:if="${error}"   th:text="${error}"></div>
+
+    <div class="card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order #</th><th>Table</th><th>Waiter</th><th>Status</th>
+                    <th>Items</th><th>Total</th><th>Created</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="o : ${orders}">
+                    <td><strong th:text="${o.orderNumber}">ORD-001</strong></td>
+                    <td th:text="${o.table.tableNumber}">1</td>
+                    <td th:text="${o.waiter?.username}">—</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${#strings.toLowerCase(o.status)}"
+                              th:text="${o.status}">NEW</span>
+                    </td>
+                    <td th:text="${#lists.size(o.items)}">0</td>
+                    <td th:text="${o.total + '€'}">0.00€</td>
+                    <td th:text="${o.createdAt != null ? #temporals.format(o.createdAt, 'dd/MM HH:mm') : '—'}">—</td>
+                    <td>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap">
+                            <form method="post"
+                                  th:action="@{/admin/orders/{id}/cancel(id=${o.id})}"
+                                  th:if="${o.status.name() != 'PAID' and o.status.name() != 'CANCELLED'}"
+                                  style="display:inline">
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Cancel order?')">Cancel</button>
+                            </form>
+                            <a th:if="${o.status.name() == 'PAID'}"
+                               th:href="@{/receipt/order/{id}(id=${o.id})}"
+                               class="btn btn-info btn-sm">Receipt</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

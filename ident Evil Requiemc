@@ -1,0 +1,17 @@
+[33mcommit 52443f7e74fc86f8e01a01a5f44a6351a736567c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: Buhnă Dorin <buhna.dorin@gmail.com>
+Date:   Mon Mar 9 14:51:57 2026 +0200
+
+    am adaugat stilul si template
+
+[33mcommit 0cb575634eacfd127a74a596cef9a13f021fdcca[m
+Author: Buhnă Dorin <buhna.dorin@gmail.com>
+Date:   Tue Feb 24 17:33:04 2026 +0200
+
+    Add paterns factory, abstractfactory, ...
+
+[33mcommit c2e6f12a881e4fda4835599163506a2e42cba30c[m
+Author: Buhnă Dorin <buhna.dorin@gmail.com>
+Date:   Tue Feb 24 17:20:25 2026 +0200
+
+    Start Project

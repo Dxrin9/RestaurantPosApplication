@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Order — Table ' + ${order.table.tableNumber} + ' — Restaurant POS'">Order</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <a class="navbar-brand" href="/">🍽️ RestaurantPOS</a>
+    <div class="navbar-nav">
+        <a class="nav-link" th:href="@{/shift}">⏱ Shift</a>
+        <a class="nav-link" th:href="@{/tables}">🪑 Tables</a>
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header" style="margin-top:24px; display:flex; justify-content:space-between; align-items:flex-end">
+        <div>
+            <h1>🪑 Table <span th:text="${order.table.tableNumber}">1</span></h1>
+            <p>Order: <strong th:text="${order.orderNumber}">—</strong>
+               &nbsp;|&nbsp; Status: <span class="badge"
+                   th:classappend="'badge-' + ${#strings.toLowerCase(order.status)}"
+                   th:text="${order.status}">NEW</span>
+            </p>
+        </div>
+        <div style="display:flex; gap:8px">
+            <a th:href="@{/tables}" class="btn btn-secondary">← Back</a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-error"   th:if="${error}"   th:text="${error}"></div>
+
+    <div class="order-layout">
+        <!-- LEFT: Add Item Form + Items List -->
+        <div class="order-form-section">
+
+            <!-- Add Item Form -->
+            <div class="card">
+                <div class="card-title">➕ Add Item</div>
+                <form method="post" th:action="@{/order/{id}/add-item(id=${order.id})}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-control" id="categorySelect" onchange="filterItems()">
+                                <option value="">All Categories</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.name}">Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product</label>
+                            <select class="form-control" name="menuItemId" id="itemSelect" required>
+                                <option value="">Select product</option>
+                                <option th:each="item : ${allItems}"
+                                        th:value="${item.id}"
+                                        th:text="${item.name + ' — ' + item.price + '€'}"
+                                        th:attr="data-category=${item.category.id}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="max-width:90px">
+                            <label class="form-label">Qty</label>
+                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="99" required>
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top:8px">
+                        <div class="form-group">
+                            <label class="form-label">Notes (optional)</label>
+                            <input type="text" name="notes" class="form-control" placeholder="e.g. No onions">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Extras (pizza toppings)</label>
+                            <input type="text" name="extras" class="form-control" placeholder="e.g. Extra cheese">
+                        </div>
+                        <div class="form-group" style="max-width:120px">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">Add Item</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Items List -->
+            <div class="card">
+                <div class="card-title">📋 Order Items</div>
+
+                <div th:if="${#lists.isEmpty(order.items)}" style="color:#999; text-align:center; padding:20px">
+                    No items added yet.
+                </div>
+
+                <table class="data-table" th:unless="${#lists.isEmpty(order.items)}">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Station</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Notes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${order.items}" th:if="!${item.voided}"
+                            th:style="${item.ready} ? 'opacity:0.6' : ''">
+                            <td>
+                                <strong th:text="${item.menuItem.name}">Item</strong>
+                                <div th:if="${item.extras}" style="font-size:0.75rem; color:#888" th:text="'+ ' + ${item.extras}"></div>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:text="${item.stationType}"
+                                      th:style="${item.stationType.name() == 'KITCHEN'} ? 'background:#fef9e7;color:#f39c12' :
+                                                 (${item.stationType.name() == 'BAR'} ? 'background:#eaf4fd;color:#3498db' : 'background:#fdf2e9;color:#e67e22')">
+                                </span>
+                            </td>
+                            <td th:text="${item.quantity}">1</td>
+                            <td th:text="${item.unitPrice + '€'}">0.00€</td>
+                            <td th:text="${item.lineTotal + '€'}">0.00€</td>
+                            <td th:text="${item.notes}"></td>
+                            <td>
+                                <span th:if="${item.ready}" style="color:#27ae60; font-size:0.8rem">✅ Ready</span>
+                                <form th:unless="${item.ready}" method="post"
+                                      th:action="@{/order/item/{itemId}/remove(itemId=${item.id})}"
+                                      style="display:inline">
+                                    <input type="hidden" name="tableId" th:value="${order.table.id}">
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Remove this item?')">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RIGHT: Order Summary & Actions -->
+        <div class="order-summary-section">
+            <div class="card">
+                <div class="card-title">💰 Order Summary</div>
+
+                <div style="font-size:0.9rem; color:#666; margin-bottom:12px">
+                    <div>Table: <strong th:text="${order.table.tableNumber}">1</strong></div>
+                    <div>Order #: <strong th:text="${order.orderNumber}">—</strong></div>
+                    <div>Waiter: <strong th:text="${order.waiter?.username}">—</strong></div>
+                </div>
+
+                <div class="total-section">
+                    <span>TOTAL</span>
+                    <span th:text="${order.total + '€'}">€0.00</span>
+                </div>
+
+                <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px">
+                    <!-- Send to Stations -->
+                    <form method="post" th:action="@{/order/{id}/send(id=${order.id})}"
+                          th:if="${order.status.name() == 'NEW'}">
+                        <button type="submit" class="btn btn-warning btn-block btn-lg"
+                                onclick="return confirm('Send order to kitchen/bar/pizza?')">
+                            📤 SEND ORDER
+                        </button>
+                    </form>
+
+                    <div th:if="${order.status.name() == 'SENT'}"
+                         class="alert alert-info" style="margin:0">
+                        ✅ Order sent to stations
+                    </div>
+
+                    <!-- Payment -->
+                    <a th:href="@{/payment/{id}(id=${order.id})}"
+                       class="btn btn-success btn-block btn-lg"
+                       th:if="${order.status.name() == 'SENT' or order.status.name() == 'READY'}">
+                        💳 CLOSE & PAY
+                    </a>
+
+                    <div th:if="${order.status.name() == 'PAID'}"
+                         class="alert alert-success" style="margin:0">
+                        ✅ Order PAID
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter product dropdown by selected category
+function filterItems() {
+    const categoryId = document.getElementById('categorySelect').value;
+    const select = document.getElementById('itemSelect');
+    const options = select.querySelectorAll('option');
+
+    options.forEach(opt => {
+        if (!opt.value) return; // skip placeholder
+        if (!categoryId || opt.dataset.category === categoryId) {
+            opt.style.display = '';
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+    select.value = '';
+}
+</script>
+</body>
+</html>
