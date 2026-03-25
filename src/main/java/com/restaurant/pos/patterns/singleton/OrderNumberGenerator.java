@@ -10,12 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ============================================================
  * DESIGN PATTERN #1: SINGLETON
  * ============================================================
- * Ensures only ONE instance of the order number generator exists
- * in the entire application. Uses Spring @Component (which is a singleton
- * by default) plus an AtomicInteger for thread-safe sequential numbering.
- *
- * Usage: Injected into OrderService to generate unique order numbers
- * like "ORD-2024-01-15-001", "ORD-2024-01-15-002", etc.
  */
 @Component
 public class OrderNumberGenerator {
